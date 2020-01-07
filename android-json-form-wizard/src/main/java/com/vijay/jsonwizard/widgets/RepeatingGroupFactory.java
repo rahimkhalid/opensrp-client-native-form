@@ -49,7 +49,6 @@ import java.util.Set;
 import timber.log.Timber;
 
 import static com.vijay.jsonwizard.constants.JsonFormConstants.FIELDS;
-import static com.vijay.jsonwizard.constants.JsonFormConstants.COUNT;
 import static com.vijay.jsonwizard.constants.JsonFormConstants.KEY;
 import static com.vijay.jsonwizard.constants.JsonFormConstants.VALUE;
 
@@ -66,7 +65,6 @@ public class RepeatingGroupFactory implements FormWidgetFactory {
     private final String REPEATING_GROUP_MAX = "repeating_group_max";
     private final String REPEATING_GROUP_MIN = "repeating_group_min";
     private static Map<Integer, String> repeatingGroupLayouts = new HashMap<>();
-    private JsonApi api;
     private ImageButton doneButton;
     private WidgetArgs widgetArgs;
 
