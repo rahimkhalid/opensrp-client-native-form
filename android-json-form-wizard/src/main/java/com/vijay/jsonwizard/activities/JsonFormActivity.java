@@ -1010,7 +1010,7 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
         }
     }
 
-    private void setReadOnlyAndFocus(View view, boolean visible, boolean popup) {
+    public void setReadOnlyAndFocus(View view, boolean visible, boolean popup) {
         try {
             String addressString = (String) view.getTag(R.id.address);
             String widgetType = (String) view.getTag(R.id.type);
@@ -1932,7 +1932,7 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
         }
     }
 
-    private void updateCanvas(View view, boolean visible, JSONArray canvasViewIds, String
+    public void updateCanvas(View view, boolean visible, JSONArray canvasViewIds, String
             addressString, JSONObject object)
             throws JSONException {
         for (int i = 0; i < canvasViewIds.length(); i++) {

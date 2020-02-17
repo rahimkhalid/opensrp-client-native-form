@@ -83,7 +83,7 @@ public class ExpansionPanelGenericPopupDialogTask extends AsyncTask<Void, Void, 
 
             FragmentTransaction fragmentTransaction = utils.getFragmentTransaction((Activity) context);
             genericPopupDialog.show(fragmentTransaction, "GenericPopup");
-            formUtils.resetFocus(context);
+          //  formUtils.resetFocus(context);
         } else {
             Toast.makeText(context, "Please specify the sub form to display ", Toast.LENGTH_LONG).show();
             Timber.e("No sub form specified. Please specify one in order to use the expansion panel.");

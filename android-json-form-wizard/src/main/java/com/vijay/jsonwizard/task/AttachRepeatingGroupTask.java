@@ -16,10 +16,13 @@ import android.widget.TextView;
 import com.vijay.jsonwizard.R;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.domain.WidgetArgs;
+import com.vijay.jsonwizard.event.ExpansionPanelHeaderEvent;
+import com.vijay.jsonwizard.event.RefreshExpansionPanelEvent;
 import com.vijay.jsonwizard.interfaces.FormWidgetFactory;
 import com.vijay.jsonwizard.interfaces.JsonApi;
 import com.vijay.jsonwizard.utils.Utils;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -217,6 +220,7 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
         repeatingGroupLabel.setTextSize(context.getResources().getInteger(R.integer.repeating_group_label_text_size));
         repeatingGroupLabel.setTextColor(context.getResources().getColor(REPEATING_GROUP_LABEL_TEXT_COLOR));
         referenceEditText.setTag(R.id.repeating_group_item_count, repeatingGroupItemCount + 1);
+        Utils.postEvent(new ExpansionPanelHeaderEvent(repeatingGroupLabelTxt + " " + repeatingGroupItemCount, repeatingGroupLabel));
     }
 
     protected void addUniqueIdentifiers(JSONObject element, String uniqueId) throws JSONException {
