@@ -983,7 +983,7 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
                 }
             }
 
-            updateCanvas(view, visible, canvasViewIds, addressString, object);
+            updateCanvas(view, visible, visible, canvasViewIds, addressString, object);
             setReadOnlyAndFocus(view, visible, popup);
         } catch (Exception e) {
             Timber.e(view.toString());
@@ -1863,7 +1863,7 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
         }
     }
 
-    public void updateCanvas(View view, boolean visible, JSONArray canvasViewIds, String addressString, JSONObject object)
+    public void updateCanvas(View view, boolean visible, boolean enable, JSONArray canvasViewIds, String addressString, JSONObject object)
             throws JSONException {
         for (int i = 0; i < canvasViewIds.length(); i++) {
             int curId = canvasViewIds.getInt(i);
@@ -1874,18 +1874,18 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
             }
 
             if (visible) {
-                curCanvasView.setEnabled(true);
+                curCanvasView.setEnabled(enable);
                 curCanvasView.setVisibility(View.VISIBLE);
 
                 if (curCanvasView instanceof RelativeLayout || view instanceof LinearLayout) {
-                    curCanvasView.setFocusable(true);
+                    curCanvasView.setFocusable(enable);
                 }
                 if (view instanceof EditText) {
-                    view.setFocusable(true);
+                    view.setFocusable(enable);
                 }
             } else {
                 clearHiddenViewsValues(object, addressString);
-                curCanvasView.setEnabled(false);
+                curCanvasView.setEnabled(enable);
                 curCanvasView.setVisibility(View.GONE);
                 refreshViews(curCanvasView);
             }
