@@ -268,7 +268,7 @@ public class NativeRadioButtonFactory implements FormWidgetFactory {
                                 errorTextView[0] = new TextView(formFragmentView.getContext());
                                 errorTextView[0].setId(R.id.error_textView);
                                 errorTextView[0].setTextColor(formFragmentView.getContext().getResources().getColor(R.color.toaster_note_red_icon));
-                                errorTextView[0].setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+                                errorTextView[0].setTextSize(formFragmentView.getContext().getResources().getDimension(R.dimen.native_radio_button_error_label_text_size));
                                 ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(constraintLayout.getLayoutParams());
                                 layoutParams.topToBottom = R.id.label_text;
                                 layoutParams.leftMargin = FormUtils.dpToPixels(formFragmentView.getContext(), 8);
@@ -279,7 +279,6 @@ public class NativeRadioButtonFactory implements FormWidgetFactory {
                         }
                     }
                 });
-
                 return new ValidationStatus(false, error, formFragmentView, radioGroup);
             } else if (errorTextView[0] != null) {
                 errorTextView[0].setVisibility(View.GONE);

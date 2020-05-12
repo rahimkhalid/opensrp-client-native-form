@@ -42,6 +42,7 @@
     <dimen name="dialog_content_margin">20dp</dimen>
     <dimen name="toolbar_text_size">23sp</dimen>
     <integer name="repeating_group_label_text_size">20</integer>
+    <dimen name="native_radio_button_error_label_text_size">20sp</dimen>
 
     <!-- Form Container -->
     <dimen name="form_container_default_padding">20dp</dimen>
