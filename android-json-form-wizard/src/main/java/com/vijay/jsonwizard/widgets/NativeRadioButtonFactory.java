@@ -259,7 +259,7 @@ public class NativeRadioButtonFactory implements FormWidgetFactory {
                     errorTv = new TextView(formFragmentView.getContext());
                     errorTv.setId(R.id.error_textView);
                     errorTv.setTextColor(formFragmentView.getContext().getResources().getColor(R.color.toaster_note_red_icon));
-                    errorTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+                    errorTv.setTextSize(formFragmentView.getContext().getResources().getDimension(R.dimen.native_radio_button_error_label_text_size));
                     ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(constraintLayout.getLayoutParams());
                     layoutParams.topToBottom = R.id.label_text;
                     layoutParams.leftMargin = FormUtils.dpToPixels(formFragmentView.getContext(), 8);
