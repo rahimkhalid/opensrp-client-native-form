@@ -5,8 +5,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
-        classpath 'org.apache.commons:commons-lang3:3.9'
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2'
+        classpath 'org.apache.commons:commons-lang3:3.7'
     }
 }
 
@@ -19,6 +18,7 @@ repositories {
 apply plugin: 'com.android.application'
 
 android {
+
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
 
@@ -31,11 +31,6 @@ android {
         multiDexEnabled true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -44,6 +39,11 @@ android {
         debug {
             testCoverageEnabled true
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

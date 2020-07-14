@@ -42,12 +42,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import timber.log.Timber;
 
 public class MultiSelectListFactory implements FormWidgetFactory {
-    public JSONObject jsonObject = new JSONObject();
+    public JSONObject jsonObject;
     public String currentAdapterKey;
     public Context context;
     private JsonFormFragment jsonFormFragment;
@@ -148,10 +150,16 @@ public class MultiSelectListFactory implements FormWidgetFactory {
 
     protected List<MultiSelectItem> prepareSelectedData() {
         try {
-            JSONArray jsonValueArray = jsonObject.has(JsonFormConstants.VALUE) ? jsonObject.getJSONArray(JsonFormConstants.VALUE) : null;
+            JSONArray jsonValueArray = jsonObject.has(JsonFormConstants.VALUE) ? jsonObject.optJSONArray(JsonFormConstants.VALUE) : null;
             if (jsonValueArray != null) {
                 return MultiSelectListUtils.processOptionsJsonArray(jsonValueArray);
             }
+
+            jsonValueArray = jsonObject.has(JsonFormConstants.VALUE) ? new JSONArray(jsonObject.optString(JsonFormConstants.VALUE)) : null;
+            if (jsonValueArray != null) {
+                return MultiSelectListUtils.processOptionsJsonArray(jsonValueArray);
+            }
+
         } catch (JSONException e) {
             Timber.e(e);
         }
@@ -368,5 +376,10 @@ public class MultiSelectListFactory implements FormWidgetFactory {
         });
 
         return relativeLayout;
+    }
+
+    @Override
+    public Set<String> getCustomTranslatableWidgetFields() {
+        return new HashSet<>();
     }
 }

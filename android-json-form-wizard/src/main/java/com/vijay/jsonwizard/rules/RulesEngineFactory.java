@@ -18,6 +18,7 @@ import org.jeasy.rules.mvel.MVELRule;
 import org.jeasy.rules.mvel.MVELRuleFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.smartregister.client.utils.contract.ClientFormContract;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class RulesEngineFactory implements RuleListener {
         try {
             Rules rules = new Rules();
             JSONObject keyJsonObject = Utils.getJsonObjectFromJsonArray(JsonFormConstants.KEY, jsonArray);
-            if(keyJsonObject != null) {
+            if (keyJsonObject != null) {
                 String key = keyJsonObject.optString(JsonFormConstants.KEY);
                 if (!ruleMap.containsKey(key)) {
                     for (int i = 0; i < jsonArray.length(); i++) {
@@ -82,7 +83,7 @@ public class RulesEngineFactory implements RuleListener {
         }
     }
 
-    private MVELRule getDynamicRulesFromJsonObject(JSONObject jsonObjectDynamicRule) {
+    private MVELRule getDynamicRulesFromJsonObject(@NonNull JSONObject jsonObjectDynamicRule) {
         try {
             MVELRule dynamicMvelRule = new MVELRule();
             dynamicMvelRule.setDescription(jsonObjectDynamicRule.optString(RuleConstant.DESCRIPTION));
@@ -97,7 +98,7 @@ public class RulesEngineFactory implements RuleListener {
         }
     }
 
-    public boolean getRelevance(Facts relevanceFact, String ruleFilename) {
+    public boolean getRelevance(@NonNull Facts relevanceFact, @NonNull String ruleFilename) {
 
         Facts facts = initializeFacts(relevanceFact);
 
@@ -138,10 +139,30 @@ public class RulesEngineFactory implements RuleListener {
     }
 
     private Rules getRulesFromAsset(String fileName) {
+
         try {
             if (!ruleMap.containsKey(fileName)) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName)));
-                ruleMap.put(fileName, MVELRuleFactory.createRulesFrom(bufferedReader));
+                BufferedReader bufferedReader;
+                boolean loadedFromDb = false;
+                if (context instanceof ClientFormContract.View) {
+                    bufferedReader = ((ClientFormContract.View) context).getRules(context, fileName);
+                    loadedFromDb = true;
+                } else {
+                    bufferedReader = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName)));
+                }
+
+                try {
+                    // This catches the yaml syntax violation error thrown by org.jeasy.rules.support.RuleDefinitionReader.read
+                    ruleMap.put(fileName, MVELRuleFactory.createRulesFrom(bufferedReader));
+                } catch (Exception ex) {
+                    Timber.e(ex);
+
+                    if (loadedFromDb) {
+                        ((ClientFormContract.View) context).handleFormError(true, fileName);
+                    }
+
+                    return null;
+                }
             }
             return ruleMap.get(fileName);
         } catch (IOException e) {
@@ -185,6 +206,19 @@ public class RulesEngineFactory implements RuleListener {
         Facts facts = initializeFacts(calculationFact);
         facts.put(RuleConstant.CALCULATION, "");
         rules = getRulesFromAsset(RULE_FOLDER_PATH + ruleFilename);
+        processDefaultRules(rules, facts);
+
+        return formatCalculationReturnValue(facts.get(RuleConstant.CALCULATION));
+    }
+
+    public String getDynamicCalculation(@NonNull Facts calculationFact, @NonNull JSONArray rulesStrObject) {
+
+        Facts facts = initializeFacts(calculationFact);
+
+        facts.put(RuleConstant.CALCULATION, false);
+
+        rules = getDynamicRulesFromJsonArray(rulesStrObject);
+
         processDefaultRules(rules, facts);
 
         return formatCalculationReturnValue(facts.get(RuleConstant.CALCULATION));

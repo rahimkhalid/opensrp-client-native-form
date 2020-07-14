@@ -1,6 +1,7 @@
 package com.vijay.jsonwizard.widgets;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +30,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ExpansionPanelFactory implements FormWidgetFactory {
     private ExpansionPanelRecordButtonClickListener expansionPanelRecordButtonClickListener = new ExpansionPanelRecordButtonClickListener();
@@ -81,6 +84,7 @@ public class ExpansionPanelFactory implements FormWidgetFactory {
         attachLayout(stepName, context, jsonFormFragment, jsonObject, commonListener, rootLayout);
 
         views.add(rootLayout);
+        //Inform user regarding expansion panel update. So that can perform any business logic based on it.
         Utils.postEvent(new ExpansionPanelInflateEvent(jsonObject, rootLayout));
         return views;
     }
@@ -198,7 +202,7 @@ public class ExpansionPanelFactory implements FormWidgetFactory {
         LinearLayout contentLayout = rootLayout.findViewById(R.id.contentLayout);
         if (jsonObject.has(JsonFormConstants.VALUE)) {
             values = jsonObject.getJSONArray(JsonFormConstants.VALUE);
-            if (checkValuesContent(values)) {
+            if (formUtils.checkValuesContent(values)) {
                 contentLayout.setVisibility(View.VISIBLE);
             }
         }
@@ -233,7 +237,7 @@ public class ExpansionPanelFactory implements FormWidgetFactory {
 
         if (jsonObject.has(JsonFormConstants.VALUE) && jsonObject.getJSONArray(JsonFormConstants.VALUE).length() > 0) {
             JSONArray value = jsonObject.optJSONArray(JsonFormConstants.VALUE);
-            if (checkValuesContent(value)) {
+            if (formUtils.checkValuesContent(value)) {
                 if (showButtons) {
                     buttonSectionLayout.setVisibility(View.VISIBLE);
                 }
@@ -283,23 +287,12 @@ public class ExpansionPanelFactory implements FormWidgetFactory {
         return false;
     }
 
-    private boolean checkValuesContent(JSONArray value) throws JSONException {
-        boolean showHiddenViews = true;
-        if (value.length() == 1) {
-            JSONObject jsonObject = value.getJSONObject(0);
-            if (jsonObject.has(JsonFormConstants.TYPE) &&
-                    JsonFormConstants.EXTENDED_RADIO_BUTTON.equals(jsonObject.getString(JsonFormConstants.TYPE))) {
-                JSONArray values = jsonObject.getJSONArray(JsonFormConstants.VALUES);
-                if (values.length() == 1) {
-                    String object = values.getString(0);
-                    if (object.contains(JsonFormConstants.AncRadioButtonOptionTextUtils.DONE_EARLIER) ||
-                            object.contains(JsonFormConstants.AncRadioButtonOptionTextUtils.DONE_TODAY)) {
-                        showHiddenViews = false;
-                    }
-                }
-            }
-        }
-        return showHiddenViews;
+    @Override
+    @NonNull
+    public Set<String> getCustomTranslatableWidgetFields() {
+        Set<String> customTranslatableWidgetFields = new HashSet<>();
+        customTranslatableWidgetFields.add(JsonFormConstants.ACCORDION_INFO_TEXT);
+        customTranslatableWidgetFields.add(JsonFormConstants.ACCORDION_INFO_TITLE);
+        return customTranslatableWidgetFields;
     }
-
 }

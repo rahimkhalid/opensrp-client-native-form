@@ -20,7 +20,6 @@ import com.vijay.jsonwizard.event.ExpansionPanelHeaderEvent;
 import com.vijay.jsonwizard.event.RefreshExpansionPanelEvent;
 import com.vijay.jsonwizard.interfaces.FormWidgetFactory;
 import com.vijay.jsonwizard.interfaces.JsonApi;
-import com.vijay.jsonwizard.rules.RuleConstant;
 import com.vijay.jsonwizard.utils.Utils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -29,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +38,7 @@ import java.util.UUID;
 
 import timber.log.Timber;
 
+import static com.vijay.jsonwizard.constants.JsonFormConstants.CALCULATION;
 import static com.vijay.jsonwizard.constants.JsonFormConstants.FIELDS;
 import static com.vijay.jsonwizard.constants.JsonFormConstants.KEY;
 import static com.vijay.jsonwizard.constants.JsonFormConstants.PARENT_REPEATING_GROUP;
@@ -49,6 +50,7 @@ import static com.vijay.jsonwizard.utils.Utils.hideProgressDialog;
 import static com.vijay.jsonwizard.utils.Utils.showProgressDialog;
 
 public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> {
+
     private LinearLayout rootLayout;
     private final ViewParent parent;
     private List<View> repeatingGroups = new ArrayList<>();
@@ -60,14 +62,16 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
     protected final int REPEATING_GROUP_LABEL_TEXT_COLOR = R.color.black;
     private Map<String, List<Map<String, Object>>> rulesFileMap = new HashMap<>();
     private Map<Integer, String> repeatingGroupLayouts;
+    private int currNumRepeatingGroups;
 
-    public AttachRepeatingGroupTask(final ViewParent parent, int numRepeatingGroups, Map<Integer, String> repeatingGroupLayouts,WidgetArgs widgetArgs,ImageButton doneButton) {
+    public AttachRepeatingGroupTask(final ViewParent parent, int numRepeatingGroups, Map<Integer, String> repeatingGroupLayouts, WidgetArgs widgetArgs, ImageButton doneButton) {
         this.rootLayout = (LinearLayout) parent;
         this.parent = parent;
         this.numRepeatingGroups = numRepeatingGroups;
         this.widgetArgs = widgetArgs;
         this.doneButton = doneButton;
         this.repeatingGroupLayouts = repeatingGroupLayouts;
+        currNumRepeatingGroups = ((ViewGroup) parent).getChildCount() - 1;
     }
 
     @Override
@@ -77,7 +81,6 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
 
     @Override
     protected List<View> doInBackground(Void... voids) {
-        int currNumRepeatingGroups = ((ViewGroup) parent).getChildCount() - 1;
         diff = numRepeatingGroups - currNumRepeatingGroups;
         for (int i = 0; i < diff; i++) {
             try {
@@ -93,6 +96,7 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
     protected void onPostExecute(List<View> result) {
         if (diff < 0) {
             try {
+
                 JSONObject step = ((JsonApi) widgetArgs.getContext()).getmJSONObject().getJSONObject(widgetArgs.getStepName());
                 JSONArray fields = step.getJSONArray(FIELDS);
                 int currNumRepeatingGroups = rootLayout.getChildCount() - 1;
@@ -102,14 +106,22 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
                     keysToRemove.add(repeatingGroupKey);
                     rootLayout.removeViewAt(i);
                 }
-                // remove deleted fields from form json
+//                remove deleted fields from form json
+                ArrayList<String> removeThisFields = new ArrayList<>();
                 int len = fields.length();
                 for (int i = len - 1; i >= 0; i--) {
                     String[] key = ((String) fields.getJSONObject(i).get(KEY)).split("_");
                     if (keysToRemove.contains(key[key.length - 1])) {
+                        removeThisFields.add((String) fields.getJSONObject(i).get(KEY));
                         fields.remove(i);
                     }
                 }
+//                remove deleted views to avoid validation errors while saving the form
+                Collection<View> viewCollection = widgetArgs.getFormFragment().getJsonApi().getFormDataViews();
+                if (viewCollection != null) {
+                    Utils.removeDeletedViewsFromJsonForm(viewCollection, removeThisFields);
+                }
+
                 LinearLayout referenceLayout = (LinearLayout) ((LinearLayout) parent).getChildAt(0);
                 referenceLayout.getChildAt(0).setTag(R.id.repeating_group_item_count, rootLayout.getChildCount());
             } catch (JSONException e) {
@@ -121,12 +133,17 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
             }
         }
 
-        ((JsonApi) widgetArgs.getContext()).invokeRefreshLogic(null, false, null, null);
+        try {
+            ((JsonApi) widgetArgs.getContext()).invokeRefreshLogic(null, false, null, null);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+
         hideProgressDialog();
         doneButton.setImageResource(R.drawable.ic_done_green);
     }
 
-    private LinearLayout buildRepeatingGroupLayout(ViewParent parent) throws Exception {
+    private LinearLayout buildRepeatingGroupLayout(final ViewParent parent) throws Exception {
         Context context = widgetArgs.getContext();
 
         LinearLayout repeatingGroup = new LinearLayout(context);
@@ -136,7 +153,10 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
         LinearLayout rootLayout = (LinearLayout) ((LinearLayout) parent).getChildAt(0);
         EditText referenceEditText = (EditText) rootLayout.getChildAt(0);
         TextView repeatingGroupLabel = new TextView(context);
-        formatRepeatingGroupLabelText(referenceEditText, repeatingGroupLabel, context);
+        if (widgetArgs.getJsonObject().optBoolean(JsonFormConstants.RepeatingGroupFactory.SHOW_GROUP_LABEL, true)) {
+            formatRepeatingGroupLabelText(referenceEditText, repeatingGroupLabel, context);
+        }
+
         repeatingGroup.addView(repeatingGroupLabel);
 
         JSONArray repeatingGroupJson = new JSONArray(repeatingGroupLayouts.get(((LinearLayout) parent).getId()));
@@ -185,8 +205,8 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
                 step.put(FIELDS, updatedFields);
             }
         }
-        repeatingGroup.setTag(R.id.repeating_group_key, groupUniqueId);
 
+        repeatingGroup.setTag(R.id.repeating_group_key, groupUniqueId);
         return repeatingGroup;
     }
 
@@ -209,7 +229,10 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
         currKey += ("_" + uniqueId);
         element.put(KEY, currKey);
         // modify relevance to reflect changes in unique key name
-        buildRelevanceWithUniqueIds(element, uniqueId);
+        if (widgetArgs != null && widgetArgs.getContext() != null) {
+            Utils.buildRulesWithUniqueId(element, uniqueId, RELEVANCE, widgetArgs.getContext(), rulesFileMap);
+            Utils.buildRulesWithUniqueId(element, uniqueId, CALCULATION, widgetArgs.getContext(), rulesFileMap);
+        }
         // modify relative max validator to reflect changes in unique key name
         JSONObject relativeMaxValidator = element.optJSONObject(V_RELATIVE_MAX);
         if (relativeMaxValidator != null) {
@@ -219,57 +242,8 @@ public class AttachRepeatingGroupTask extends AsyncTask<Void, Void, List<View>> 
         }
     }
 
-    private void buildRelevanceWithUniqueIds(JSONObject element, String uniqueId) throws JSONException {
-        JSONObject relevance = element.optJSONObject(RELEVANCE);
-        if (relevance != null) {
-            if (relevance.has(RuleConstant.RULES_ENGINE) && widgetArgs != null) {
-                JSONObject jsonRulesEngineObject = relevance.optJSONObject(RuleConstant.RULES_ENGINE);
-                JSONObject jsonExRules = jsonRulesEngineObject.optJSONObject(JsonFormConstants.JSON_FORM_KEY.EX_RULES);
-                String fileName = JsonFormConstants.RULE + jsonExRules.optString(RuleConstant.RULES_DYNAMIC);
-
-                if (!rulesFileMap.containsKey(fileName)) {
-                    Iterable<Object> objectIterable = Utils.readYamlFile(fileName, widgetArgs.getContext());
-                    List<Map<String, Object>> arrayList = new ArrayList<>();
-                    while (objectIterable.iterator().hasNext()) {
-                        Map<String, Object> map = (Map<String, Object>) objectIterable.iterator().next();
-                        if (map != null) {
-                            arrayList.add(map);
-                        }
-                    }
-                    rulesFileMap.put(fileName, arrayList);
-                }
-
-                List<Map<String, Object>> mapArrayList = rulesFileMap.get(fileName);
-
-                JSONArray jsonArrayRules = new JSONArray();
-                JSONObject keyJsonObject = new JSONObject();
-                keyJsonObject.put(KEY, uniqueId);
-                jsonArrayRules.put(keyJsonObject);
-                for (Map<String, Object> map : mapArrayList) {
-                    JSONObject jsonRulesDynamicObject = new JSONObject();
-                    String strCondition = (String) map.get(RuleConstant.CONDITION);
-                    List<String> conditionKeys = Utils.getConditionKeys(strCondition);
-                    for (String conditionKey : conditionKeys) {
-                        strCondition = strCondition.replace(conditionKey, conditionKey + "_" + uniqueId);
-                    }
-                    jsonRulesDynamicObject.put(RuleConstant.NAME, String.valueOf(map.get(RuleConstant.NAME)).concat("_").concat(uniqueId));
-                    jsonRulesDynamicObject.put(RuleConstant.DESCRIPTION, String.valueOf(map.get(RuleConstant.DESCRIPTION)).concat("_").concat(uniqueId));
-                    jsonRulesDynamicObject.put(RuleConstant.PRIORITY, map.get(RuleConstant.PRIORITY));
-                    jsonRulesDynamicObject.put(RuleConstant.ACTIONS, ((ArrayList<String>) map.get(RuleConstant.ACTIONS)).get(0));
-                    jsonRulesDynamicObject.put(RuleConstant.CONDITION, String.valueOf(strCondition));
-                    jsonArrayRules.put(jsonRulesDynamicObject);
-                }
-
-                jsonExRules.put(RuleConstant.RULES_DYNAMIC, jsonArrayRules);
-
-            } else {
-                String currRelevanceKey = relevance.keys().next();
-                JSONObject relevanceObj = relevance.getJSONObject(currRelevanceKey);
-                String newRelevanceKey = currRelevanceKey + "_" + uniqueId;
-                relevance.remove(currRelevanceKey);
-                relevance.put(newRelevanceKey, relevanceObj);
-            }
-        }
-
+    @Override
+    protected void onCancelled() {
+        hideProgressDialog();
     }
 }
