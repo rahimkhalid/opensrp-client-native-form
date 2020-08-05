@@ -80,12 +80,14 @@ public class PropertyManager {
     @SuppressLint("MissingPermission")
     private String getDeviceId() {
         String deviceId = null;
-        if (mTelephonyManager != null) {
-            if (mTelephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_NONE) { //For tablet
-                deviceId = Settings.Secure.getString(mContext.getApplicationContext().getContentResolver(),
-                        Settings.Secure.ANDROID_ID);
-            } else { //for normal phones
-                deviceId = mTelephonyManager.getDeviceId();
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (mTelephonyManager != null) {
+                if (mTelephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_NONE) { //For tablet
+                    deviceId = Settings.Secure.getString(mContext.getApplicationContext().getContentResolver(),
+                            Settings.Secure.ANDROID_ID);
+                } else { //for normal phones
+                    deviceId = mTelephonyManager.getDeviceId();
+                }
             }
         }
         return deviceId;
@@ -137,18 +139,20 @@ public class PropertyManager {
         if (deviceId != null) {
             mProperties.put(DEVICE_ID_PROPERTY, deviceId);
         }
-        String value;
-        value = mTelephonyManager.getSubscriberId();
-        if (value != null) {
-            mProperties.put(SUBSCRIBER_ID_PROPERTY, value);
-        }
-        value = mTelephonyManager.getSimSerialNumber();
-        if (value != null) {
-            mProperties.put(SIM_SERIAL_PROPERTY, value);
-        }
-        value = mTelephonyManager.getLine1Number();
-        if (value != null) {
-            mProperties.put(PHONE_NUMBER_PROPERTY, value);
+        String value = null;
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            value = mTelephonyManager.getSubscriberId();
+            if (value != null) {
+                mProperties.put(SUBSCRIBER_ID_PROPERTY, value);
+            }
+            value = mTelephonyManager.getSimSerialNumber();
+            if (value != null) {
+                mProperties.put(SIM_SERIAL_PROPERTY, value);
+            }
+            value = mTelephonyManager.getLine1Number();
+            if (value != null) {
+                mProperties.put(PHONE_NUMBER_PROPERTY, value);
+            }
         }
     }
 
