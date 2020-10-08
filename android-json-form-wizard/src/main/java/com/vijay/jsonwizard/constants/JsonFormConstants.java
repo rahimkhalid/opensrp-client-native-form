@@ -106,6 +106,7 @@ public class JsonFormConstants {
     public static final String NATIVE_RADIO_EXTRA_INFO_COLOR = "extra_info_color";
     public static final String DEFAULT_TEXT_COLOR = "#212121";
     public static final String DEFAULT_HINT_TEXT_COLOR = "#808080";
+    public static final String DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR = "#979797";
     public static final String DEFAULT_NUMBER_SELECTOR_TEXT_COLOR = "#ffffff";
     public static final String TOASTER_NOTES = "toaster_notes";
     public static final String TOASTER_TYPE = "toaster_type";
@@ -224,6 +225,10 @@ public class JsonFormConstants {
 
     public static final String JSON_FILE_EXTENSION = ".json";
     public static final String CLIENT_FORM_ASSET_VERSION = "base version";
+
+    public static final String RADIO_INDENTATION = "radio_indentation";
+    public static final String VALIDATE_FOR_BLANK_PAGE = "validate_for_blank_page";
+    public static final String IGNORE_RADIO_LABEL_VALIDATION = "ignore_radio_label_validation";
 
     public interface MultiSelectUtils {
         String IS_HEADER = "isHeader";

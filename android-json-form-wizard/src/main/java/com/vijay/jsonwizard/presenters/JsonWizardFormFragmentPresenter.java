@@ -28,6 +28,12 @@ public class JsonWizardFormFragmentPresenter extends JsonFormFragmentPresenter {
         boolean validateOnSubmit = validateOnSubmit();
         if (validateOnSubmit && getIncorrectlyFormattedFields().isEmpty()) {
             return moveToNextWizardStep();
+        } else if (isNoItemSelectedInTheSection()) {
+            // if form is valid, then show error of no item selected else show error to correct the mistakes in the form
+            getView().showSnackBar(
+                    getView().getContext().getResources().getString(
+                            isFormValid() ? R.string.json_form_select_atleast_one_item_error : R.string.json_form_on_next_error_msg
+                    ));
         } else if (isFormValid()) {
             return moveToNextWizardStep();
         } else {

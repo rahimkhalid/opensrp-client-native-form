@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.Html;
@@ -301,12 +302,16 @@ public class FormUtils {
                                                                JSONArray canvasIds, Boolean readOnly,
                                                                CommonListener listener, boolean popup) throws JSONException {
         Map<String, View> createdViewsMap = new HashMap<>();
+        // boolean to decide if label ca be added with empty text
         String label = jsonObject.optString(JsonFormConstants.LABEL, "");
-        if (StringUtils.isNotBlank(label)) {
+        boolean ignoreRadioLabelValidation = jsonObject.optBoolean(JsonFormConstants.IGNORE_RADIO_LABEL_VALIDATION) && StringUtils.isBlank(label);
+
+        if (ignoreRadioLabelValidation || StringUtils.isNotBlank(label)) {
             String asterisks = "";
             int labelTextSize = FormUtils.getValueFromSpOrDpOrPx(jsonObject.optString(JsonFormConstants.LABEL_TEXT_SIZE, String.valueOf(context
                     .getResources().getDimension(R.dimen.default_label_text_size))), context);
             String labelTextColor = jsonObject.optString(JsonFormConstants.LABEL_TEXT_COLOR, JsonFormConstants.DEFAULT_TEXT_COLOR);
+//            String labelTextColor = jsonObject.optString(JsonFormConstants.LABEL_TEXT_COLOR, JsonFormConstants.DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR);
             JSONObject requiredObject = jsonObject.optJSONObject(JsonFormConstants.V_REQUIRED);
             ConstraintLayout labelConstraintLayout = createLabelLinearLayout(stepName, canvasIds, jsonObject, context, listener);
             labelConstraintLayout.setTag(R.id.extraPopup, popup);
@@ -321,10 +326,15 @@ public class FormUtils {
 
             String combinedLabelText = "<font color=" + labelTextColor + ">" + label + "</font>" + asterisks;
 
+            // radio button has no label, so add an empty label with 0dp height i.e, kind of a hidden view
+            if (ignoreRadioLabelValidation) {
+                labelText.getLayoutParams().height = 0;
+            }
+
             //Applying textStyle to the text;
             String textStyle = jsonObject.optString(JsonFormConstants.TEXT_STYLE, JsonFormConstants.NORMAL);
             if (labelText != null && editButton != null) {
-                setTextStyle(textStyle, labelText);
+                setTextStyle(textStyle, labelText, context);
                 labelText.setText(Html.fromHtml(combinedLabelText));
                 labelText.setTag(R.id.extraPopup, popup);
                 labelText.setTag(R.id.original_text, Html.fromHtml(combinedLabelText));
@@ -418,21 +428,21 @@ public class FormUtils {
     /**
      *
      */
-    public static void setTextStyle(String textStyle, AppCompatTextView view) {
+    public static void setTextStyle(String textStyle, AppCompatTextView view, Context context) {
         if (view != null && StringUtils.isNotBlank(textStyle)) {
             switch (textStyle) {
                 case JsonFormConstants.BOLD:
-                    view.setTypeface(null, Typeface.BOLD);
+                    view.setTypeface(ResourcesCompat.getFont(context, R.font.inter_semibold), Typeface.BOLD);
                     break;
                 case JsonFormConstants.ITALIC:
-                    view.setTypeface(null, Typeface.ITALIC);
+                    view.setTypeface(ResourcesCompat.getFont(context, R.font.inter_regular), Typeface.ITALIC);
                     break;
                 case JsonFormConstants.BOLD_ITALIC:
-                    view.setTypeface(null, Typeface.BOLD_ITALIC);
+                    view.setTypeface(ResourcesCompat.getFont(context, R.font.inter_semibold), Typeface.BOLD_ITALIC);
                     break;
                 case JsonFormConstants.NORMAL:
                 default:
-                    view.setTypeface(null, Typeface.NORMAL);
+                    view.setTypeface(ResourcesCompat.getFont(context, R.font.inter_regular), Typeface.NORMAL);
                     break;
             }
         }

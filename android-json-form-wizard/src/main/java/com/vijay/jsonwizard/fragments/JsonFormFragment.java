@@ -277,7 +277,17 @@ public class JsonFormFragment extends MvpFragment<JsonFormFragmentPresenter, Jso
 
     public boolean next() {
         try {
-            return presenter.onNextClick(mMainView);
+            /*
+              to fix the wrong thread issues, code is put into runOnUithread() method
+              Issue Detail: CalledFromWrongThreadException;: Only the original thread that created a view hierarchy can touch its views
+            */
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    presenter.onNextClick(mMainView);
+                }
+            });
+
         } catch (Exception e) {
             Timber.e(e, " --> next");
         }

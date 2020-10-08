@@ -28,6 +28,7 @@ import com.vijay.jsonwizard.validators.edittext.MinNumericValidator;
 import com.vijay.jsonwizard.validators.edittext.RequiredValidator;
 import com.vijay.jsonwizard.views.JsonFormFragmentView;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,8 +42,23 @@ import java.util.Set;
  * Created by vijay on 24-05-2015.
  */
 public class NativeEditTextFactory implements FormWidgetFactory {
+
+    /**
+     * Runnable is causing delay for normal_edit_text validations, so want to remove runnable without impacting old code.
+     */
     public static ValidationStatus validate(final JsonFormFragmentView formFragmentView,
                                             final NativeEditText editText) {
+
+        // if no validation for blank page then return false
+        JSONObject entireJsonForm = ((JsonApi)formFragmentView.getContext()).getmJSONObject();
+//        boolean validateForBlankPage = entireJsonForm.optBoolean(JsonFormConstants.VALIDATE_FOR_BLANK_PAGE, false);
+
+//        return validateForBlankPage ?
+                return getValidationStatusWithoutRunnable(formFragmentView, editText);
+//                : getValidationStatusWithRunnable(formFragmentView, editText);
+    }
+
+    private static ValidationStatus getValidationStatusWithRunnable(JsonFormFragmentView formFragmentView, NativeEditText editText) {
         final ValidationStatus[] validationStatus = {new ValidationStatus(true, null, formFragmentView, editText)};
         ((JsonFormActivity) formFragmentView.getContext()).runOnUiThread(new Runnable() {
             @Override
@@ -56,6 +72,17 @@ public class NativeEditTextFactory implements FormWidgetFactory {
             }
         });
         return validationStatus[0];
+    }
+
+    @NotNull
+    private static ValidationStatus getValidationStatusWithoutRunnable(JsonFormFragmentView formFragmentView, NativeEditText editText) {
+        if (editText.isEnabled()) {
+            boolean validate = editText.validate();
+            if (!validate) {
+                return new ValidationStatus(false, editText.getError().toString(), formFragmentView, editText);
+            }
+        }
+        return new ValidationStatus(true, null, formFragmentView, editText);
     }
 
     @Override

@@ -146,7 +146,7 @@ public class LabelFactory implements FormWidgetFactory {
         int labelTextSize = getValueFromSpOrDpOrPx(context, jsonObject.optString(JsonFormConstants.TEXT_SIZE, String.valueOf(context.getResources().getDimension(R
                 .dimen.default_label_text_size))));
         String textStyle = jsonObject.optString(JsonFormConstants.TEXT_STYLE, JsonFormConstants.NORMAL);
-        FormUtils.setTextStyle(textStyle, labelText);
+        FormUtils.setTextStyle(textStyle, labelText, context);
         labelText.setTextSize(labelTextSize);
         labelText.setEnabled(!jsonObject
                 .optBoolean(JsonFormConstants.READ_ONLY, false));//Gotcha: Should be set before createLabelText is used
@@ -178,7 +178,17 @@ public class LabelFactory implements FormWidgetFactory {
             numberText.setVisibility(View.VISIBLE);
             Boolean readOnly = jsonObject.optBoolean(JsonFormConstants.READ_ONLY);
             String labelTextColor = readOnly ? "#737373" : jsonObject.optString(JsonFormConstants.TEXT_COLOR, null);
-            FormUtils.setTextStyle(textStyle, numberText);
+            // change text color as default to DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR
+//            String labelTextColor;
+//            if (readOnly) {
+//                labelTextColor = "#737373";
+//            } else if (jsonObject.has(JsonFormConstants.TEXT_COLOR)) {
+//                labelTextColor = jsonObject.optString(JsonFormConstants.TEXT_COLOR, null);
+//            } else {
+//                labelTextColor = jsonObject.optString(JsonFormConstants.DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR, null);
+//            }
+
+            FormUtils.setTextStyle(textStyle, numberText, context);
             numberText.setTextSize(labelTextSize);
             numberText.setEnabled(!jsonObject
                     .optBoolean(JsonFormConstants.READ_ONLY, false));//Gotcha: Should be set before createLabelText is used
@@ -205,6 +215,17 @@ public class LabelFactory implements FormWidgetFactory {
         String text = jsonObject.getString(JsonFormConstants.TEXT);
         Boolean readOnly = jsonObject.optBoolean(JsonFormConstants.READ_ONLY);
         String asterisks = getAsterisk(jsonObject);
+
+        // change text color as default to DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR
+//        String labelTextColor;
+//        if (readOnly) {
+//            labelTextColor = "#737373";
+//        } else if (jsonObject.has(JsonFormConstants.TEXT_COLOR)) {
+//            labelTextColor = jsonObject.optString(JsonFormConstants.TEXT_COLOR, null);
+//        } else {
+//            labelTextColor = jsonObject.optString(JsonFormConstants.DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR, null);
+//        }
+
         String labelTextColor = readOnly ? "#737373" : jsonObject.optString(JsonFormConstants.TEXT_COLOR, null);
         String combinedLabelText = getCombinedLabel(text, asterisks, labelTextColor);
 

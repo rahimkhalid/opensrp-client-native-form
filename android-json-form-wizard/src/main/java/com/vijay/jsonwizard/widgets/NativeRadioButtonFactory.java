@@ -350,8 +350,12 @@ public class NativeRadioButtonFactory implements FormWidgetFactory {
         LinearLayout rootLayout = getLinearRootLayout(context);
 
         Map<String, View> labelViews = new HashMap<>();
+
         String label = jsonObject.optString(JsonFormConstants.LABEL, "");
-        if (StringUtils.isNotBlank(label)) {
+        // boolean to decide if label ca be added with empty text
+        boolean ignoreRadioLabelValidation = jsonObject.optBoolean(JsonFormConstants.IGNORE_RADIO_LABEL_VALIDATION) && StringUtils.isBlank(label);
+
+        if (ignoreRadioLabelValidation || StringUtils.isNotBlank(label)) {
             labelViews = formUtils.createRadioButtonAndCheckBoxLabel(stepName, rootLayout, jsonObject, context, canvasIds, readOnly, listener, popup);
         }
 
@@ -417,6 +421,14 @@ public class NativeRadioButtonFactory implements FormWidgetFactory {
             formUtils.showInfoIcon(stepName, jsonObject, listener, FormUtils.getInfoDialogAttributes(item), imageView, canvasIds);
 
             createRadioButton(radioGroupLayout, jsonObject, item, listener, popup);
+
+            boolean enableRadioIndentation = jsonObject.optBoolean(JsonFormConstants.RADIO_INDENTATION, true);
+
+            if (enableRadioIndentation) {
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.setMargins((int) context.getResources().getDimension(R.dimen.native_radio_button_margin), 0, 0, 0);
+                radioGroupLayout.setLayoutParams(params);
+            }
 
             radioGroup.addView(radioGroupLayout);
             ((JsonApi) context).addFormDataView(radioGroup);
@@ -523,6 +535,7 @@ public class NativeRadioButtonFactory implements FormWidgetFactory {
                 radioButton.setChecked(true);
             }
             String optionTextColor = JsonFormConstants.DEFAULT_TEXT_COLOR;
+//            String optionTextColor = JsonFormConstants.DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR;
             if (item.has(JsonFormConstants.TEXT_COLOR)) {
                 optionTextColor = item.getString(JsonFormConstants.TEXT_COLOR);
             }

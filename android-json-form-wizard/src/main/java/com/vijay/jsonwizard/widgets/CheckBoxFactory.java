@@ -280,6 +280,7 @@ public class CheckBoxFactory extends BaseFactory {
      */
     private void createCheckBoxText(CheckBox checkBox, JSONObject item, Context context, Boolean readOnly)
             throws JSONException {
+//        String optionTextColor = JsonFormConstants.DEFAULT_CHECKBOX_RADIO_BTN_TEXT_COLOR;
         String optionTextColor = JsonFormConstants.DEFAULT_TEXT_COLOR;
         String optionTextSize = String.valueOf(context.getResources().getDimension(R.dimen.options_default_text_size));
         if (item.has(JsonFormConstants.TEXT_COLOR)) {

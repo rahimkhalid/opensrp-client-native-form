@@ -173,6 +173,12 @@ public class JsonFormFragmentPresenter extends
         boolean validateOnSubmit = validateOnSubmit();
         if (validateOnSubmit && incorrectlyFormattedFields.isEmpty()) {
             return moveToNextStep();
+        } else if (isNoItemSelectedInTheSection()) {
+            // if form is valid, then show error of no item selected else show error to correct the mistakes in the form
+            getView().showSnackBar(
+                    getView().getContext().getResources().getString(
+                            isFormValid() ? R.string.json_form_select_atleast_one_item_error : R.string.json_form_on_next_error_msg
+                    ));
         } else if (isFormValid()) {
             return moveToNextStep();
         } else {
@@ -249,6 +255,76 @@ public class JsonFormFragmentPresenter extends
 
         }
         formFragment.getOnFieldsInvalidCallback().passInvalidFields(invalidFields);
+    }
+
+    /**
+     * this method checks if any item selected on the section/page or not
+     * @return true if not item is selected
+     */
+    public boolean isNoItemSelectedInTheSection() {
+
+
+        // if no validation for blank page then return false
+        JSONObject entireJsonForm = formFragment.getJsonApi().getStep(mStepName);
+        boolean validateForBlankPage = entireJsonForm.optBoolean(JsonFormConstants.VALIDATE_FOR_BLANK_PAGE, false);
+        if (!validateForBlankPage) {
+            return false;
+        }
+
+        boolean isNoItemSelected = true;
+
+        for (View childView : formFragment.getJsonApi().getFormDataViews()) {
+
+            if (JsonFormConstants.HIDDEN.equals(childView.getTag(R.id.type)) || childView.getVisibility() != View.VISIBLE) {
+                // Don't validate if the child view has type as hidden or its not visible currently.
+
+            } else if (childView instanceof MaterialEditText) {
+                MaterialEditText editText = (MaterialEditText) childView;
+                if(!editText.getText().toString().trim().isEmpty()) {
+                    isNoItemSelected = false;
+                    break;
+                }
+
+            } else if (childView instanceof NativeEditText) {
+                NativeEditText editText = (NativeEditText) childView;
+                if(!editText.getText().toString().trim().isEmpty()) {
+                    isNoItemSelected = false;
+                    break;
+                }
+
+            } else if (childView instanceof CheckBox) {
+                if(((CheckBox) childView).isChecked()) {
+                    isNoItemSelected = false;
+                    break;
+                }
+            } else if (childView instanceof ViewGroup
+                    && childView.getTag(R.id.is_checkbox_linear_layout) != null &&
+                    Boolean.TRUE.equals(childView.getTag(R.id.is_checkbox_linear_layout))) {
+
+                CheckBox checkBox = (CheckBox) ((LinearLayout)((LinearLayout)childView).getChildAt(0)).getChildAt(0);
+                if(checkBox.isChecked()) {
+                    isNoItemSelected = false;
+                    break;
+                }
+
+            } else if (childView instanceof RadioButton) {
+
+                if (((RadioButton) childView).isChecked()) {
+                    isNoItemSelected = false;
+                    break;
+                }
+
+            } else if (childView instanceof RadioGroup) {
+                RadioGroup radioGroup = (RadioGroup) childView;
+                ValidationStatus validationStatus = NativeRadioButtonFactory.validate(formFragment, radioGroup);
+                if (validationStatus.isValid()) {
+                    isNoItemSelected = false;
+                    break;
+                }
+            }
+        }
+
+        return isNoItemSelected;
     }
 
     /**
@@ -427,7 +503,14 @@ public class JsonFormFragmentPresenter extends
         validateAndWriteValues();
         checkAndStopCountdownAlarm();
         boolean isFormValid = isFormValid();
-        if (isFormValid || Boolean.valueOf(mainView.getTag(R.id.skip_validation).toString())) {
+
+        if (isNoItemSelectedInTheSection()) {
+            // if form is valid, then show error of no item selected else show error to correct the mistakes in the form
+            getView().showSnackBar(
+                    getView().getContext().getResources().getString(
+                            isFormValid() ? R.string.json_form_select_atleast_one_item_error : R.string.json_form_on_next_error_msg
+                    ));
+        } else if (isFormValid || Boolean.valueOf(mainView.getTag(R.id.skip_validation).toString())) {
             Utils.removeGeneratedDynamicRules(formFragment);
             Intent returnIntent = new Intent();
             getView().onFormFinish();

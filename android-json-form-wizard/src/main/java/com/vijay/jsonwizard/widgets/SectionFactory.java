@@ -57,7 +57,7 @@ public class SectionFactory implements FormWidgetFactory {
 
         textView.setTextColor(Color.parseColor(textColor));
         textView.setTextSize(FormUtils.getValueFromSpOrDpOrPx(textSize, context));
-        FormUtils.setTextStyle(textStyle, textView);
+        FormUtils.setTextStyle(textStyle, textView, context);
         relativeLayout.setBackgroundColor(Color.parseColor(backgroundColor));
     }
 
