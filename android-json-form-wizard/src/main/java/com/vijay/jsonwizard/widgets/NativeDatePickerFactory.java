@@ -53,22 +53,13 @@ public class NativeDatePickerFactory implements FormWidgetFactory {
 
     private static void showDatePickerDialog(Activity context, DatePickerDialog datePickerDialog, MaterialEditText editText, String defaultDate) {
 
-//        FragmentTransaction ft = context.getFragmentManager().beginTransaction();
-//        Fragment prev = context.getFragmentManager().findFragmentByTag(TAG);
-
-//        if (!(prev != null && prev.isAdded())) {
-
             datePickerDialog.show();
-
-            //Fragments are committed asynchronously, force commit
-//            context.getFragmentManager().executePendingTransactions();
 
             String text = editText.getText().toString();
             Calendar date = FormUtils.getDate(StringUtils.isNoneBlank(Form.getDatePickerDisplayFormat()) ?
                     Utils.formatDateToPattern(text, Form.getDatePickerDisplayFormat(), DATE_FORMAT.toPattern())
                     : text);
             if (text.isEmpty()) {
-//                Object defaultValue = datePickerDialog.getArguments().get(JsonFormConstants.DEFAULT);
                 if (!defaultDate.trim().isEmpty()) {
                     Calendar cal = FormUtils.getDate(defaultDate);
                     datePickerDialog.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
@@ -186,40 +177,17 @@ public class NativeDatePickerFactory implements FormWidgetFactory {
             editText.setTag(R.id.json_object, jsonObject);
 
             final DatePickerDialog datePickerDialog = createDateDialog(context, duration, editText, jsonObject);
-//            if (formFragment != null) {
-//                NativeFormsProperties nativeFormsProperties = JsonFormFragment.getNativeFormProperties();
-//                if (nativeFormsProperties != null) {
-//                    datePickerDialog.setNumericDatePicker(nativeFormsProperties.isTrue(NativeFormsProperties.KEY.WIDGET_DATEPICKER_IS_NUMERIC));
-//                }
-//            }
-
-//            if (jsonObject.has(JsonFormConstants.EXPANDED) && jsonObject.getBoolean(JsonFormConstants.EXPANDED)
-//                    && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//                datePickerDialog.setCalendarViewShown(true);
-//            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//                datePickerDialog.setCalendarViewShown(false);
-//            }
 
             GenericTextWatcher genericTextWatcher = getGenericTextWatcher(stepName, (Activity) context, formFragment,
                     editText, datePickerDialog);
             editText.addTextChangedListener(genericTextWatcher);
             addRefreshLogicView(context, editText, relevance, constraints, calculations);
-//            Bundle datePickerArgs = new Bundle();
-//            datePickerArgs.putString(JsonFormConstants.DEFAULT, jsonObject.optString(JsonFormConstants.DEFAULT));
-//            datePickerDialog.setArguments(datePickerArgs);
-            editText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showDatePickerDialog((Activity) context, datePickerDialog, editText, jsonObject.optString(JsonFormConstants.DEFAULT));
-                }
-            });
 
-            editText.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    updateDateText(context, editText, duration, "");
-                    return true;
-                }
+            editText.setOnClickListener(v -> showDatePickerDialog((Activity) context, datePickerDialog, editText, jsonObject.optString(JsonFormConstants.DEFAULT)));
+
+            editText.setOnLongClickListener(v -> {
+                updateDateText(context, editText, duration, "");
+                return true;
             });
             editText.setFocusable(false);
         } catch (Exception e) {
@@ -321,6 +289,10 @@ public class NativeDatePickerFactory implements FormWidgetFactory {
     protected DatePickerDialog createDateDialog(final Context context, final TextView duration, final MaterialEditText editText,
                                                 JSONObject jsonObject) throws JSONException {
 
+        Calendar currentCalendar = Calendar.getInstance();
+        int startYear = currentCalendar.get(Calendar.YEAR);
+        int startMonth = currentCalendar.get(Calendar.MONTH);
+        int startDay = currentCalendar.get(Calendar.DAY_OF_MONTH);
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(context, R.style.AppThemeAlertDialog, (DatePickerDialog.OnDateSetListener) (view, year, month, dayOfMonth) -> {
 
@@ -340,35 +312,7 @@ public class NativeDatePickerFactory implements FormWidgetFactory {
                 updateDateText(context, editText, duration, "");
             }
 
-        }, 2020,10,8);
-
-
-//        final DatePickerDialog datePickerDialog = new DatePickerDialog();
-//        datePickerDialog.setContext(context);
-
-//        Locale locale = getCurrentLocale(context);
-//        final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy", locale);
-
-        /*datePickerDialog.setOnDateSetListener(new android.app.DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar calendarDate = Calendar.getInstance();
-                calendarDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                calendarDate.set(Calendar.MONTH, monthOfYear);
-                calendarDate.set(Calendar.YEAR, year);
-
-                editText.setTag(R.id.locale_independent_value, DATE_FORMAT_LOCALE_INDEPENDENT.format(calendarDate.getTime()));
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
-                        && calendarDate.getTimeInMillis() >= view.getMinDate()
-                        && calendarDate.getTimeInMillis() <= view.getMaxDate()) {
-                    updateDateText(context, editText, duration,
-                            DATE_FORMAT.format(calendarDate.getTime()));
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    updateDateText(context, editText, duration, "");
-                }
-            }
-        });*/
+        }, startYear,startMonth,startDay);
 
         if (jsonObject.has(JsonFormConstants.MIN_DATE) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             Calendar minDate = FormUtils.getDate(jsonObject.getString(JsonFormConstants.MIN_DATE));
