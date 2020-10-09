@@ -2,6 +2,7 @@ package com.vijay.jsonwizard.widgets;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
@@ -288,6 +289,11 @@ public class CheckBoxFactory extends BaseFactory {
         }
         if (item.has(JsonFormConstants.TEXT_SIZE)) {
             optionTextSize = item.getString(JsonFormConstants.TEXT_SIZE);
+        }
+
+        String textStyle = item.optString(JsonFormConstants.TEXT_STYLE, JsonFormConstants.NORMAL);
+        if(JsonFormConstants.BOLD.equalsIgnoreCase(textStyle)) {
+            checkBox.setTypeface(checkBox.getTypeface(), Typeface.BOLD);
         }
 
         checkBox.setText(item.getString(JsonFormConstants.TEXT));

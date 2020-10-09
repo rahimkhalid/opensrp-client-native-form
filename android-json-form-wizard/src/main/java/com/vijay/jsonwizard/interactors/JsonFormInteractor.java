@@ -25,6 +25,7 @@ import com.vijay.jsonwizard.widgets.ImagePickerFactory;
 import com.vijay.jsonwizard.widgets.ImageViewFactory;
 import com.vijay.jsonwizard.widgets.LabelFactory;
 import com.vijay.jsonwizard.widgets.MultiSelectListFactory;
+import com.vijay.jsonwizard.widgets.NativeDatePickerFactory;
 import com.vijay.jsonwizard.widgets.NativeEditTextFactory;
 import com.vijay.jsonwizard.widgets.NativeRadioButtonFactory;
 import com.vijay.jsonwizard.widgets.NumberSelectorFactory;
@@ -121,6 +122,7 @@ public class JsonFormInteractor {
         map.put(JsonFormConstants.FINGER_PRINT, new FingerPrintFactory());
         map.put(JsonFormConstants.SPINNER, new SpinnerFactory());
         map.put(JsonFormConstants.DATE_PICKER, new DatePickerFactory());
+        map.put(JsonFormConstants.NATIVE_DATE_PICKER, new NativeDatePickerFactory());
         map.put(JsonFormConstants.TREE, new TreeViewFactory());
         map.put(JsonFormConstants.BARCODE, new BarcodeFactory());
         map.put(JsonFormConstants.BUTTON, new ButtonFactory());
