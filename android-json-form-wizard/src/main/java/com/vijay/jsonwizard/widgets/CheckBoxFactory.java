@@ -59,17 +59,18 @@ public class CheckBoxFactory extends BaseFactory {
     private static boolean performValidation(LinearLayout checkboxLinearLayout) {
         //Iterate through child layouts skipping first which is the label for the checkbox factory
         boolean isChecked = false;
-        for (int i = 0; i < checkboxLinearLayout.getChildCount(); i++) {
-//            if (i == 0) {
-//                continue;
-//            }
-            LinearLayout checkboxOptionLayout = (LinearLayout) checkboxLinearLayout.getChildAt(i);
-            CheckBox currentCheckbox = (CheckBox) checkboxOptionLayout.getChildAt(0);
-            if (currentCheckbox.isChecked()) {
-                isChecked = true;
-                break;
-            }
 
+        for (int i = 0; i < checkboxLinearLayout.getChildCount(); i++) {
+            View view = checkboxLinearLayout.getChildAt(i);
+
+            if(view instanceof LinearLayout) {
+                LinearLayout checkboxOptionLayout = (LinearLayout) checkboxLinearLayout.getChildAt(i);
+                CheckBox currentCheckbox = (CheckBox) checkboxOptionLayout.getChildAt(0);
+                if (currentCheckbox.isChecked()) {
+                    isChecked = true;
+                    break;
+                }
+            }
         }
         return isChecked;
     }
