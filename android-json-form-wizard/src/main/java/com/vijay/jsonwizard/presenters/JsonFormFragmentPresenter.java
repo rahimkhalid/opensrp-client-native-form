@@ -177,11 +177,19 @@ public class JsonFormFragmentPresenter extends
             // if form is valid, then show error of no item selected else show error to correct the mistakes in the form
             getView().showSnackBar(
                     getView().getContext().getResources().getString(
-                            isFormValid() ? R.string.json_form_select_atleast_one_item_error : R.string.json_form_on_next_error_msg
+                            R.string.json_form_select_atleast_one_item_error
                     ));
         } else if (isFormValid()) {
             return moveToNextStep();
         } else {
+            if(!isFormValid()) {
+                ValidationStatus validationStatus = getInvalidFields().get(getInvalidFields().keySet().toArray()[0]);
+                if (validationStatus.getErrorMessage() != null && !validationStatus.getErrorMessage().trim().isEmpty() && validationStatus.getErrorMessage().trim().equalsIgnoreCase("Section is mandatory")) {
+                    getView().showSnackBar(
+                            getView().getContext().getResources().getString(R.string.json_form_select_atleast_one_item__from_each_section_error));
+                    return false;
+                }
+            }
             getView().showSnackBar(
                     getView().getContext().getResources().getString(R.string.json_form_on_next_error_msg));
         }

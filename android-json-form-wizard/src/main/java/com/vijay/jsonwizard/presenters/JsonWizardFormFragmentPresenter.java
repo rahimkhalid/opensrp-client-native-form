@@ -7,6 +7,7 @@ import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.fragments.JsonWizardFormFragment;
 import com.vijay.jsonwizard.interactors.JsonFormInteractor;
+import com.vijay.jsonwizard.utils.ValidationStatus;
 
 /**
  * Created by keyman on 04/12/18.
@@ -32,13 +33,21 @@ public class JsonWizardFormFragmentPresenter extends JsonFormFragmentPresenter {
             // if form is valid, then show error of no item selected else show error to correct the mistakes in the form
             getView().showSnackBar(
                     getView().getContext().getResources().getString(
-                            isFormValid() ? R.string.json_form_select_atleast_one_item_error : R.string.json_form_on_next_error_msg
+                            R.string.json_form_select_atleast_one_item_error
                     ));
         } else if (isFormValid()) {
             return moveToNextWizardStep();
         } else {
-            getView().showSnackBar(getView().getContext().getResources()
-                    .getString(R.string.json_form_on_next_error_msg));
+            if(!isFormValid()) {
+                ValidationStatus validationStatus = getInvalidFields().get(getInvalidFields().keySet().toArray()[0]);
+                if (validationStatus.getErrorMessage() != null && !validationStatus.getErrorMessage().trim().isEmpty() && validationStatus.getErrorMessage().trim().equalsIgnoreCase("Section is mandatory")) {
+                    getView().showSnackBar(
+                            getView().getContext().getResources().getString(R.string.json_form_select_atleast_one_item__from_each_section_error));
+                    return false;
+                }
+            }
+            getView().showSnackBar(
+                    getView().getContext().getResources().getString(R.string.json_form_on_next_error_msg));
         }
         return false;
     }
