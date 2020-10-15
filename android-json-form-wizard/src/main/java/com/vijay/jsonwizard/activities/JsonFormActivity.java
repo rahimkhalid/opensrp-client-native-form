@@ -1855,10 +1855,16 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
     private void clearHiddenViewsValues(JSONObject object, String addressString) {
         if (object != null) {
             String objectKey = addressString.replace(":", "_");
-            formValuesCacheMap.remove(objectKey);
-            formValuesCacheMap.put(objectKey, "");
-            if (object.has(JsonFormConstants.VALUE)) {
-                object.remove(JsonFormConstants.VALUE);
+            try {
+//                if(!object.getString(JsonFormConstants.TYPE).equals(JsonFormConstants.SPINNER)) {
+                    formValuesCacheMap.remove(objectKey);
+                    formValuesCacheMap.put(objectKey, "");
+                    if (object.has(JsonFormConstants.VALUE)) {
+                        object.remove(JsonFormConstants.VALUE);
+                    }
+//                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
