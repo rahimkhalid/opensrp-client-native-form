@@ -1906,7 +1906,7 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
         Object jsonObject = object;
         try {
             if (jsonObject.toString().contains(".")) {
-                jsonObject = String.valueOf((float) Math.round(Float.valueOf(jsonObject.toString()) * 100) / 100);
+                jsonObject = ((double) Math.round(Double.parseDouble(jsonObject.toString()) * 100) / 100);
             } else {
                 jsonObject = Integer.valueOf(jsonObject.toString());
             }
@@ -1924,10 +1924,16 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
     private void clearHiddenViewsValues(JSONObject object, String addressString) {
         if (object != null) {
             String objectKey = addressString.replace(":", "_");
-            formValuesCacheMap.remove(objectKey);
-            formValuesCacheMap.put(objectKey, "");
-            if (object.has(JsonFormConstants.VALUE)) {
-                object.remove(JsonFormConstants.VALUE);
+            try {
+                if(!object.getString(JsonFormConstants.TYPE).equals(JsonFormConstants.SPINNER)) {
+                    formValuesCacheMap.remove(objectKey);
+                    formValuesCacheMap.put(objectKey, "");
+                    if (object.has(JsonFormConstants.VALUE)) {
+                        object.remove(JsonFormConstants.VALUE);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
