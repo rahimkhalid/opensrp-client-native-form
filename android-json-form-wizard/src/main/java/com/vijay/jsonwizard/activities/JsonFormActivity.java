@@ -1856,12 +1856,10 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
         if (object != null) {
             String objectKey = addressString.replace(":", "_");
             try {
-                if(!object.getString(JsonFormConstants.TYPE).equals(JsonFormConstants.SPINNER)) {
-                    formValuesCacheMap.remove(objectKey);
-                    formValuesCacheMap.put(objectKey, "");
-                    if (object.has(JsonFormConstants.VALUE)) {
-                        object.remove(JsonFormConstants.VALUE);
-                    }
+                formValuesCacheMap.remove(objectKey);
+                formValuesCacheMap.put(objectKey, "");
+                if (object.has(JsonFormConstants.VALUE)) {
+                    object.remove(JsonFormConstants.VALUE);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1950,6 +1948,7 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
                 } else if (child instanceof MaterialSpinner) {
                     MaterialSpinner spinner = (MaterialSpinner) child;
                     spinner.setSelected(false);
+                    spinner.setSelection(0);
                 } else if (child instanceof CustomTextView) {
                     resetSelectedNumberBackground(child);
 
