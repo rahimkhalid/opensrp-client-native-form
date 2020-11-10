@@ -1762,6 +1762,23 @@ public class JsonFormActivity extends JsonFormBaseActivity implements JsonApi {
                     if (JsonFormConstants.NUMBER_SELECTOR.equals(type)) {
                         setNumberSelectorCalculation(calculation, linearLayout);
                     }
+
+                } else if (view instanceof MaterialSpinner) {
+
+                    if(!calculation.isEmpty()) {
+
+                        // select index provided in calculations
+                        MaterialSpinner spinner = (MaterialSpinner) view;
+                        int count = spinner.getCount();
+                        int index = Integer.parseInt(calculation);
+
+                        if(index >=0 && index < count) {
+                            spinner.setSelection(index);
+                        } else {
+                            Timber.e("index is not valid");
+                        }
+                    }
+
                 } else {
                     ((TextView) view).setText(calculation);
                 }
