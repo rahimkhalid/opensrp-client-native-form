@@ -216,12 +216,20 @@ public class CheckBoxFactory extends BaseFactory {
                 checkBox.setChecked(true);
             }
 
+            // checkbox start margin to be set as indentation
+            int indentationMargin = FormUtils.dpToPixels(context, jsonObject.optInt(JsonFormConstants.INDENTATION_MARGIN_START, 0));
+
             checkBox.setEnabled(!readOnly);
             if (i == options.length() - 1) {
                 checkboxLayout.setLayoutParams(
-                        getLinearLayoutParams(MATCH_PARENT, WRAP_CONTENT, 0, 0, 0, (int)
+                        getLinearLayoutParams(MATCH_PARENT, WRAP_CONTENT, indentationMargin, 0, 0, (int)
                                 context
                                         .getResources().getDimension(R.dimen.extra_bottom_margin)));
+            } else {
+
+                // get existing layout params and add indentation margin
+                checkboxLayout.setLayoutParams(
+                        getLinearLayoutParams(MATCH_PARENT, WRAP_CONTENT, indentationMargin, 0, 0, 0));
             }
             //Displaying optional info alert dialog
             ImageView imageView = checkboxLayout.findViewById(R.id.checkbox_info_icon);
