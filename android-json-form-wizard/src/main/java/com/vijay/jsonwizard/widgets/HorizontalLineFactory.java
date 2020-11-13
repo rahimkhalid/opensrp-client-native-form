@@ -7,11 +7,13 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.rey.material.util.ViewUtil;
 import com.vijay.jsonwizard.R;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.interfaces.CommonListener;
 import com.vijay.jsonwizard.interfaces.FormWidgetFactory;
+import com.vijay.jsonwizard.interfaces.JsonApi;
 import com.vijay.jsonwizard.utils.FormUtils;
 
 import org.json.JSONArray;
@@ -33,15 +35,15 @@ public class HorizontalLineFactory implements FormWidgetFactory {
 
     @Override
     public List<View> getViewsFromJson(String stepName, Context context, JsonFormFragment formFragment, JSONObject jsonObject, CommonListener listener, boolean popup) throws Exception {
-        return attachJson(context, jsonObject, popup);
+        return attachJson(context, jsonObject, popup, stepName);
     }
 
     @Override
     public List<View> getViewsFromJson(String stepName, Context context, JsonFormFragment formFragment, JSONObject jsonObject, CommonListener listener) throws Exception {
-        return attachJson(context, jsonObject, false);
+        return attachJson(context, jsonObject, false, stepName);
     }
 
-    private List<View> attachJson(Context context, JSONObject jsonObject, boolean popup) throws JSONException {
+    private List<View> attachJson(Context context, JSONObject jsonObject, boolean popup, String stepName) throws JSONException {
         // Create the view
         String openMrsEntityParent = jsonObject.getString(JsonFormConstants.OPENMRS_ENTITY_PARENT);
         String openMrsEntity = jsonObject.getString(JsonFormConstants.OPENMRS_ENTITY);
@@ -62,6 +64,12 @@ public class HorizontalLineFactory implements FormWidgetFactory {
 
         View horizontalLine = new View(context);
 
+        // Attach json -> id, key, canvasIds(empty) other values such as openmrs
+        JSONArray canvasIds = new JSONArray();
+
+        horizontalLine.setId(ViewUtil.generateViewId());
+        canvasIds.put(horizontalLine.getId());
+
         // Add linear layout params & custom properties - height, bottom_margin, top_margin, left_margin, right_margin (enable sp, dp, px)
         LinearLayout.LayoutParams layoutParams = FormUtils.getLinearLayoutParams(absWidth
                 , FormUtils.getValueFromSpOrDpOrPx(height, context)
@@ -75,16 +83,19 @@ public class HorizontalLineFactory implements FormWidgetFactory {
         }
         horizontalLine.setLayoutParams(layoutParams);
 
-        // Attach json -> id, key, canvasIds(empty) other values such as openmrs
-        JSONArray jsonArray = new JSONArray();
-
         horizontalLine.setTag(R.id.key, key);
-        horizontalLine.setTag(R.id.canvas_ids, jsonArray.toString());
+        horizontalLine.setTag(R.id.canvas_ids, canvasIds.toString());
         horizontalLine.setTag(R.id.openmrs_entity, openMrsEntity);
         horizontalLine.setTag(R.id.openmrs_entity_id, openMrsEntityId);
         horizontalLine.setTag(R.id.openmrs_entity_parent, openMrsEntityParent);
-        horizontalLine.setTag(R.id.relevance, relevance);
         horizontalLine.setTag(R.id.extraPopup, popup);
+        horizontalLine.setTag(R.id.type, jsonObject.getString(JsonFormConstants.TYPE));
+        horizontalLine.setTag(R.id.address, stepName + ":" + jsonObject.getString(JsonFormConstants.KEY));
+
+        if (!TextUtils.isEmpty(relevance) && context instanceof JsonApi) {
+            horizontalLine.setTag(R.id.relevance, relevance);
+            ((JsonApi) context).addSkipLogicView(horizontalLine);
+        }
 
         // Add other custom properties such as bg_color
         String bgColorHex = jsonObject.optString("bg_color", null);
