@@ -230,7 +230,8 @@ public class JsonFormConstants {
     public static final String RADIO_INDENTATION = "radio_indentation";
     public static final String VALIDATE_FOR_BLANK_PAGE = "validate_for_blank_page";
     public static final String IGNORE_RADIO_LABEL_VALIDATION = "ignore_radio_label_validation";
-    public static final String INDENTATION_MARGIN_START = "indentation_margin_dp";
+    public static final String CHECK_BOX_INDENTATION_MARGIN_START = "check_box_indentation_margin_dp";
+    public static final String RADIO_INDENTATION_MARGIN_START = "radio_button_indentation_margin_dp";
 
     public interface MultiSelectUtils {
         String IS_HEADER = "isHeader";

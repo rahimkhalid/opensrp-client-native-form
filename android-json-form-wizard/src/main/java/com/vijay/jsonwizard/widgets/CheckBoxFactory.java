@@ -217,7 +217,7 @@ public class CheckBoxFactory extends BaseFactory {
             }
 
             // checkbox start margin to be set as indentation
-            int indentationMargin = FormUtils.dpToPixels(context, jsonObject.optInt(JsonFormConstants.INDENTATION_MARGIN_START, 0));
+            int indentationMargin = FormUtils.dpToPixels(context, jsonObject.optInt(JsonFormConstants.CHECK_BOX_INDENTATION_MARGIN_START, 0));
 
             checkBox.setEnabled(!readOnly);
             if (i == options.length() - 1) {

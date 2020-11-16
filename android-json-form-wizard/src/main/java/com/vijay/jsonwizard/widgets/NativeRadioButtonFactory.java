@@ -425,8 +425,14 @@ public class NativeRadioButtonFactory implements FormWidgetFactory {
             boolean enableRadioIndentation = jsonObject.optBoolean(JsonFormConstants.RADIO_INDENTATION, true);
 
             if (enableRadioIndentation) {
+                // radio button start margin to be set as indentation
+                // if has radio start margin then set that, otherwise set the default one
+                int marginStart  = jsonObject.has(JsonFormConstants.RADIO_INDENTATION_MARGIN_START) ?
+                        FormUtils.dpToPixels(context, jsonObject.getInt(JsonFormConstants.RADIO_INDENTATION_MARGIN_START)) :
+                        (int) context.getResources().getDimension(R.dimen.native_radio_button_margin);
+
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                params.setMargins((int) context.getResources().getDimension(R.dimen.native_radio_button_margin), 0, 0, 0);
+                params.setMargins(marginStart, 0, 0, 0);
                 radioGroupLayout.setLayoutParams(params);
             }
 
