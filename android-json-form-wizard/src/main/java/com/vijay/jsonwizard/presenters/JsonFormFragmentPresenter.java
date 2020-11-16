@@ -217,7 +217,7 @@ public class JsonFormFragmentPresenter extends
                 handleWrongFormatInputs(validationStatus, fieldKey, rawValue);
 
                 String type = (String) childView.getTag(R.id.type);
-                rawValue = JsonFormConstants.DATE_PICKER.equals(type) || JsonFormConstants.TIME_PICKER.equals(type) ? childView.getTag(R.id.locale_independent_value).toString() : rawValue;
+                rawValue = (JsonFormConstants.DATE_PICKER.equals(type) || JsonFormConstants.TIME_PICKER.equals(type)) && !editText.getText().toString().isEmpty() ? childView.getTag(R.id.locale_independent_value).toString() : rawValue;
                 Log.d("Writing values ..", key + " " + rawValue);
 
                 getView().writeValue(mStepName, key, rawValue, openMrsEntityParent, openMrsEntity, openMrsEntityId, popup);
