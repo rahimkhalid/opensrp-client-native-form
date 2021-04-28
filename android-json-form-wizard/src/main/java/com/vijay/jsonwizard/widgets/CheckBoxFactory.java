@@ -5,15 +5,18 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.constraint.ConstraintLayout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.rey.material.util.ViewUtil;
 import com.vijay.jsonwizard.R;
+import com.vijay.jsonwizard.activities.JsonFormActivity;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 import com.vijay.jsonwizard.fragments.JsonFormFragment;
 import com.vijay.jsonwizard.interfaces.CommonListener;
@@ -45,12 +48,35 @@ import static com.vijay.jsonwizard.utils.FormUtils.getValueFromSpOrDpOrPx;
 public class CheckBoxFactory extends BaseFactory {
     private FormUtils formUtils = new FormUtils();
 
-    public static ValidationStatus validate(JsonFormFragmentView formFragmentView, LinearLayout checkboxLinearLayout) {
-        String error = (String) checkboxLinearLayout.getTag(R.id.error);
+    public static ValidationStatus validate(final JsonFormFragmentView formFragmentView, final LinearLayout checkboxLinearLayout) {
+        final String error = (String) checkboxLinearLayout.getTag(R.id.error);
         if (checkboxLinearLayout.isEnabled() && error != null) {
             boolean isValid = performValidation(checkboxLinearLayout);
+            final TextView[] errorTextView = {checkboxLinearLayout.findViewById(R.id.error_textView)};
             if (!isValid) {
-                return new ValidationStatus(false, error, formFragmentView, checkboxLinearLayout);
+                ((JsonFormActivity) formFragmentView.getContext()).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (checkboxLinearLayout.getChildAt(0) instanceof ConstraintLayout) {
+                            ConstraintLayout constraintLayout = (ConstraintLayout) checkboxLinearLayout.getChildAt(0);
+                            if (errorTextView[0] == null) {
+                                errorTextView[0] = new TextView(formFragmentView.getContext());
+                                errorTextView[0].setId(R.id.error_textView);
+                                errorTextView[0].setTextColor(formFragmentView.getContext().getResources().getColor(R.color.toaster_note_red_icon));
+                                errorTextView[0].setTextSize(formFragmentView.getContext().getResources().getDimension(R.dimen.native_radio_button_error_label_text_size));
+                                ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(constraintLayout.getLayoutParams());
+                                layoutParams.topToBottom = R.id.label_text;
+                                layoutParams.leftMargin = FormUtils.dpToPixels(formFragmentView.getContext(), 8);
+                                constraintLayout.addView(errorTextView[0], new ConstraintLayout.LayoutParams(layoutParams));
+                            }
+                            errorTextView[0].setVisibility(View.VISIBLE);
+                            errorTextView[0].setText(error);
+                        }
+                    }
+                });
+                return new ValidationStatus(false, "error", formFragmentView, checkboxLinearLayout);
+            } else if (errorTextView[0] != null) {
+                errorTextView[0].setVisibility(View.GONE);
             }
         }
         return new ValidationStatus(true, null, formFragmentView, checkboxLinearLayout);

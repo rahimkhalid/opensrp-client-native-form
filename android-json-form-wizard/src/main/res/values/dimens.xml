@@ -73,4 +73,5 @@
     <dimen name="advanced_search_toolbar_padding">20dp</dimen>
     <dimen name="advanced_search_toolbar_drawable_padding">10dp</dimen>
     <dimen name="advanced_search_toolbar_text_size">20sp</dimen>
+    <dimen name="font_12sp">12sp</dimen>
 </resources>
